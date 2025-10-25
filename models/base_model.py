@@ -1,44 +1,113 @@
 #!/usr/bin/python3
-"""This module defines a base class for all models in our hbnb clone"""
+"""This module defines a base class for all models in our hbnb clone
+
+It also defines the SQLAlchemy Base() for mapped classes to inherit from.
+"""
 import uuid
 from datetime import datetime
+from sqlalchemy import Column, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+
+
+# Base class for SQLAlchemy models. BaseModel does NOT inherit from Base;
+# concrete models will inherit from both BaseModel and Base.
+Base = declarative_base()
 
 
 class BaseModel:
-    """A base class for all hbnb models"""
+    """A base class for all hbnb models
+
+    Contains common methods and SQLAlchemy column descriptors (as class
+    attributes) so classes that inherit from BaseModel and Base will be
+    properly mapped.
+    """
+    id = Column(String(60), primary_key=True, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
     def __init__(self, *args, **kwargs):
-        """Instatntiates a new model"""
+        """Instantiate a new model
+
+        If kwargs provided, use them to set attributes (parsing datetimes).
+        Otherwise, generate a new id and set created_at/updated_at.
+        Note: do NOT register the new instance in storage here — registration
+        is performed in save() to avoid premature persistence during
+        SQLAlchemy-driven operations.
+        """
         if not kwargs:
-            from models import storage
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            storage.new(self)
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
+            # For FileStorage, register the new instance immediately to keep
+            # backward compatibility with existing tests and behaviour.
+            try:
+                from models import storage
+                # If storage is FileStorage, it expects new() to be called here
+                if getattr(storage, '__class__', None).__name__ == 'FileStorage':
+                    storage.new(self)
+            except Exception:
+                pass
         else:
-            kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-            kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
-                                                     '%Y-%m-%dT%H:%M:%S.%f')
-            del kwargs['__class__']
-            self.__dict__.update(kwargs)
+            # Expect created_at and updated_at to be provided in kwargs (old
+            # behaviour). Raise KeyError if they're missing to match tests.
+            if 'created_at' not in kwargs or 'updated_at' not in kwargs:
+                raise KeyError('created_at and updated_at required in kwargs')
+
+            # parse datetimes
+            if isinstance(kwargs['created_at'], str):
+                kwargs['created_at'] = datetime.strptime(
+                    kwargs['created_at'], '%Y-%m-%dT%H:%M:%S.%f')
+            if isinstance(kwargs['updated_at'], str):
+                kwargs['updated_at'] = datetime.strptime(
+                    kwargs['updated_at'], '%Y-%m-%dT%H:%M:%S.%f')
+
+            # remove class name if present
+            kwargs.pop('__class__', None)
+            for key, value in kwargs.items():
+                setattr(self, key, value)
 
     def __str__(self):
-        """Returns a string representation of the instance"""
-        cls = (str(type(self)).split('.')[-1]).split('\'')[0]
+        """String representation"""
+        cls = (str(type(self)).split('.')[-1]).split("'")[0]
         return '[{}] ({}) {}'.format(cls, self.id, self.__dict__)
 
     def save(self):
-        """Updates updated_at with current time when instance is changed"""
+        """Update updated_at and persist the instance via storage
+
+        The storage.new() call is executed here before storage.save() so
+        that newly created instances are properly registered in the
+        current storage engine (FileStorage or DBStorage).
+        """
         from models import storage
-        self.updated_at = datetime.now()
+        self.updated_at = datetime.utcnow()
+        try:
+            storage.new(self)
+        except Exception:
+            # storage may not implement new() for some engines; ignore
+            pass
         storage.save()
 
     def to_dict(self):
-        """Convert instance into dict format"""
-        dictionary = {}
-        dictionary.update(self.__dict__)
+        """Return a dict representation of the instance
+
+        Ensure SQLAlchemy internals (_sa_instance_state) are not included.
+        """
+        dictionary = dict(self.__dict__)
+        # remove SQLAlchemy instance state if present
+        dictionary.pop('_sa_instance_state', None)
         dictionary.update({'__class__':
-                          (str(type(self)).split('.')[-1]).split('\'')[0]})
-        dictionary['created_at'] = self.created_at.isoformat()
-        dictionary['updated_at'] = self.updated_at.isoformat()
+                          (str(type(self)).split('.')[-1]).split("'")[0]})
+        # convert datetimes to isoformat
+        if 'created_at' in dictionary and isinstance(dictionary['created_at'], datetime):
+            dictionary['created_at'] = dictionary['created_at'].isoformat()
+        if 'updated_at' in dictionary and isinstance(dictionary['updated_at'], datetime):
+            dictionary['updated_at'] = dictionary['updated_at'].isoformat()
         return dictionary
+
+    def delete(self):
+        """Delete the current instance from storage"""
+        from models import storage
+        try:
+            storage.delete(self)
+        except Exception:
+            pass

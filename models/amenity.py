@@ -1,7 +1,13 @@
 #!/usr/bin/python3
-""" State Module for HBNB project """
-from models.base_model import BaseModel
+""" Amenity Module for HBNB project """
+from os import getenv
+from models.base_model import BaseModel, Base
 
 
-class Amenity(BaseModel):
-    name = ""
+class Amenity(BaseModel, Base):
+    __tablename__ = 'amenities'
+
+    if getenv('HBNB_TYPE_STORAGE') == 'db':
+        pass
+    else:
+        name = ""
