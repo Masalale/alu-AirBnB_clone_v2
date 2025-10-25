@@ -94,7 +94,7 @@ class TestCreateParams(unittest.TestCase):
             sys.stdout = sys_stdout
         out = captured.getvalue().strip()
         # out should be the city id
-        city_id = out.split('\n')[-1].strip()
+        city_id = [line for line in out.split('\n') if line][-1]
         self.assertTrue(city_id)
         state_key = 'State.' + state_id
         city_key = 'City.' + city_id
@@ -119,7 +119,7 @@ class TestCreateParams(unittest.TestCase):
         finally:
             sys.stdout = sys_stdout
         out = captured.getvalue().strip()
-        city_id = out.split('\n')[-1].strip()
+        city_id = [line for line in out.split('\n') if line][-1]
         self.assertTrue(city_id)
         state_key = 'State.' + state_id
         city_key = 'City.' + city_id
@@ -141,11 +141,11 @@ class TestCreateParams(unittest.TestCase):
             cons.onecmd('create State name="California"')
             state_id = captured.getvalue().strip()
             cons.onecmd(f'create City state_id="{state_id}" name="San_Francisco_is_super_cool"')
-            city_id = captured.getvalue().split('\n')[-1].strip()
+            city_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
             cons.onecmd('create User email="my@me.com" password="pwd" first_name="FN" last_name="LN"')
-            user_id = captured.getvalue().split('\n')[-1].strip()
+            user_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
             cons.onecmd(f'create Place city_id="{city_id}" user_id="{user_id}" name="My_house" description="no_description_yet" number_rooms=4 number_bathrooms=1 max_guest=3 price_by_night=100 latitude=120.12 longitude=101.4')
-            place_id = captured.getvalue().split('\n')[-1].strip()
+            place_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
             cons.onecmd(f'show Place {place_id}')
         finally:
             sys.stdout = sys_stdout
