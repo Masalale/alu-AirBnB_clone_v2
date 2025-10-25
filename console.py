@@ -208,23 +208,7 @@ class HBNBCommand(cmd.Cmd):
 
         # save and print id
         storage.save()
-        # When tests capture stdout with io.StringIO, prefer writing ids
-        # separated by newlines but avoid leaving a trailing newline which
-        # some tests rely on (they call getvalue().split('\n')[-1]).
-        out_stream = sys.stdout
-        if hasattr(out_stream, 'getvalue'):
-            try:
-                current = out_stream.getvalue()
-            except Exception:
-                current = None
-            # prefix a newline if there's already content, then write id
-            if current:
-                out_stream.write('\n' + new_instance.id)
-            else:
-                out_stream.write(new_instance.id)
-        else:
-            # Regular terminal output: print with newline
-            print(new_instance.id)
+        print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
