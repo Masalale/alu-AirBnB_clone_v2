@@ -2,6 +2,7 @@
 """This module defines a class User"""
 from os import getenv
 from models.base_model import BaseModel, Base
+from sqlalchemy import Column, String
 
 
 class User(BaseModel, Base):
@@ -9,10 +10,10 @@ class User(BaseModel, Base):
     __tablename__ = 'users'
 
     if getenv('HBNB_TYPE_STORAGE') == 'db':
-        # Additional columns (email, password, first_name, last_name) can be
-        # added as Column() definitions if needed. For now rely on
-        # BaseModel columns and manage attributes dynamically.
-        pass
+        email = Column(String(128), nullable=False)
+        password = Column(String(128), nullable=False)
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
     else:
         email = ''
         password = ''
