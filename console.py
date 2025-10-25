@@ -114,17 +114,101 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """ Create an object of any class with optional params
+
+        Usage: create <ClassName> [key="value" | key=value ...]
+        Strings must be wrapped in double quotes. Inside string values,
+        double quotes must be escaped with a backslash. Underscores in
+        string values are converted to spaces.
+        """
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        # isolate class name and parameter string
+        parts = args.split(' ', 1)
+        cls_name = parts[0]
+        params_str = parts[1] if len(parts) > 1 else ''
+
+        if cls_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+
+        # parse parameters from params_str
+        params = {}
+        i = 0
+        s = params_str
+        n = len(s)
+        while i < n:
+            # skip spaces
+            while i < n and s[i] == ' ':
+                i += 1
+            if i >= n:
+                break
+            # read key
+            key_start = i
+            while i < n and s[i] != '=' and s[i] != ' ':
+                i += 1
+            key = s[key_start:i]
+            if i >= n or s[i] != '=':
+                # malformed token, skip to next space
+                while i < n and s[i] != ' ':
+                    i += 1
+                continue
+            i += 1  # skip '='
+            # read value
+            if i < n and s[i] == '"':
+                # quoted string
+                i += 1
+                val_chars = []
+                while i < n:
+                    if s[i] == '\\' and i + 1 < n and s[i + 1] == '"':
+                        val_chars.append('"')
+                        i += 2
+                    elif s[i] == '"':
+                        i += 1
+                        break
+                    else:
+                        val_chars.append(s[i])
+                        i += 1
+                val = ''.join(val_chars)
+                # convert underscores to spaces
+                val = val.replace('_', ' ')
+                params[key] = val
+            else:
+                # unquoted value until next space
+                val_start = i
+                while i < n and s[i] != ' ':
+                    i += 1
+                raw = s[val_start:i]
+                # try to parse as int or float
+                if raw.count('.') == 1:
+                    try:
+                        val = float(raw)
+                        params[key] = val
+                    except Exception:
+                        # skip malformed
+                        pass
+                else:
+                    try:
+                        val = int(raw)
+                        params[key] = val
+                    except Exception:
+                        # skip malformed
+                        pass
+
+        # create instance and apply params
+        new_instance = HBNBCommand.classes[cls_name]()
+        for k, v in params.items():
+            try:
+                # set attribute only if value parsed correctly
+                setattr(new_instance, k, v)
+            except Exception:
+                continue
+
+        # save and print id
         storage.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
