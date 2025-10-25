@@ -2,6 +2,19 @@
 """ Place Module for HBNB project """
 from os import getenv
 from models.base_model import BaseModel, Base
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Text, Table
+from sqlalchemy.orm import relationship
+
+
+# association table for many-to-many Place <-> Amenity
+place_amenity = None
+if getenv('HBNB_TYPE_STORAGE') == 'db':
+    from sqlalchemy import Table, MetaData
+    metadata = MetaData()
+    place_amenity = Table('place_amenity', metadata,
+                          Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False),
+                          Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False)
+                          )
 
 
 class Place(BaseModel, Base):
@@ -9,8 +22,17 @@ class Place(BaseModel, Base):
     __tablename__ = 'places'
 
     if getenv('HBNB_TYPE_STORAGE') == 'db':
-        # Additional column definitions can be added here for DB storage.
-        pass
+        city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
+        user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
+        name = Column(String(128), nullable=False)
+        description = Column(Text, nullable=True)
+        number_rooms = Column(Integer, default=0, nullable=False)
+        number_bathrooms = Column(Integer, default=0, nullable=False)
+        max_guest = Column(Integer, default=0, nullable=False)
+        price_by_night = Column(Integer, default=0, nullable=False)
+        latitude = Column(Float, nullable=True)
+        longitude = Column(Float, nullable=True)
+        amenities = relationship('Amenity', secondary=place_amenity, viewonly=False)
     else:
         city_id = ""
         user_id = ""
