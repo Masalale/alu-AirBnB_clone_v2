@@ -19,16 +19,16 @@ class HBNBCommand(cmd.Cmd):
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
+        'BaseModel': BaseModel, 'User': User, 'Place': Place,
+        'State': State, 'City': City, 'Amenity': Amenity,
+        'Review': Review
+    }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
-             'number_rooms': int, 'number_bathrooms': int,
-             'max_guest': int, 'price_by_night': int,
-             'latitude': float, 'longitude': float
-            }
+        'number_rooms': int, 'number_bathrooms': int,
+        'max_guest': int, 'price_by_night': int,
+        'latitude': float, 'longitude': float
+    }
 
     def preloop(self):
         """Prints if isatty is false"""
@@ -73,8 +73,8 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] == '{' and pline[-1] == '}' and \
-                            type(eval(pline)) is dict:
+                    if pline[0] == '{' and pline[-1] == '}'\
+                            and type(eval(pline)) is dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -114,101 +114,44 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class with optional params
 
-        Usage: create <ClassName> [key="value" | key=value ...]
-        Strings must be wrapped in double quotes. Inside string values,
-        double quotes must be escaped with a backslash. Underscores in
-        string values are converted to spaces.
-        """
-        if not args:
+        # split the args to get the class name
+        class_name = args.split(' ')[0]
+        # Validate if the class name is provided and if it exists
+        if not class_name:
             print("** class name missing **")
-            return
-
-        # isolate class name and parameter string
-        parts = args.split(' ', 1)
-        cls_name = parts[0]
-        params_str = parts[1] if len(parts) > 1 else ''
-
-        if cls_name not in HBNBCommand.classes:
+        elif class_name not in HBNBCommand.classes.keys():
             print("** class doesn't exist **")
-            return
+        else:
+            # create an instance of the class
+            new_model = HBNBCommand.classes[class_name]()
 
-        # parse parameters from params_str
-        params = {}
-        i = 0
-        s = params_str
-        n = len(s)
-        while i < n:
-            # skip spaces
-            while i < n and s[i] == ' ':
-                i += 1
-            if i >= n:
-                break
-            # read key
-            key_start = i
-            while i < n and s[i] != '=' and s[i] != ' ':
-                i += 1
-            key = s[key_start:i]
-            if i >= n or s[i] != '=':
-                # malformed token, skip to next space
-                while i < n and s[i] != ' ':
-                    i += 1
-                continue
-            i += 1  # skip '='
-            # read value
-            if i < n and s[i] == '"':
-                # quoted string
-                i += 1
-                val_chars = []
-                while i < n:
-                    if s[i] == '\\' and i + 1 < n and s[i + 1] == '"':
-                        val_chars.append('"')
-                        i += 2
-                    elif s[i] == '"':
-                        i += 1
-                        break
-                    else:
-                        val_chars.append(s[i])
-                        i += 1
-                val = ''.join(val_chars)
-                # convert underscores to spaces
-                val = val.replace('_', ' ')
-                params[key] = val
-            else:
-                # unquoted value until next space
-                val_start = i
-                while i < n and s[i] != ' ':
-                    i += 1
-                raw = s[val_start:i]
-                # try to parse as int or float
-                if raw.count('.') == 1:
+            # if there are parameters provided, set the attributes
+            if len(args.split(' ')) > 1:
+
+                # get the parameters from the string
+                params = args.split(' ')[1:]
+                for param in params:
+                    # split the param to get the key and value
+                    key, value = param.split('=')
+
+                    # if value is convertable to another type, convert it
+                    # convertable types are int, float, bool
                     try:
-                        val = float(raw)
-                        params[key] = val
-                    except Exception:
-                        # skip malformed
+                        value = eval(value)
+                    except Exception as e:
                         pass
-                else:
-                    try:
-                        val = int(raw)
-                        params[key] = val
-                    except Exception:
-                        # skip malformed
-                        pass
+                    # if value is a string and it contains underscore(_)
+                    # replace the underscore with space
+                    if type(value) is str and '_' in value:
+                        value = value.replace('_', ' ')
 
-        # create instance and apply params
-        new_instance = HBNBCommand.classes[cls_name]()
-        for k, v in params.items():
-            try:
-                # set attribute only if value parsed correctly
-                setattr(new_instance, k, v)
-            except Exception:
-                continue
-
-        # save and print id
-        storage.save()
-        print(new_instance.id)
+                    setattr(new_model, key, value)
+                new_model.save()
+                print(new_model.id)
+                return
+            new_model.save()
+            print(new_model.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -271,7 +214,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del storage.all()[key]
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -290,11 +233,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(HBNBCommand.classes[args]).items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all().items():
                 print_list.append(str(v))
 
         print(print_list)
@@ -356,7 +299,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] == '"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -367,8 +310,8 @@ class HBNBCommand(cmd.Cmd):
             if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] == '"':
-                att_val = args[2][1:args[2].find('"', 1)]
+            if args[2] and args[2][0] == '\"':
+                att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
             if not att_val and args[2]:
