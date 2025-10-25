@@ -2,12 +2,20 @@
 """ """
 from models.base_model import BaseModel
 import unittest
+import os
+from models import storage
+try:
+    from models.engine.file_storage import FileStorage
+except Exception:
+    FileStorage = None
 import datetime
 from uuid import UUID
 import json
 import os
 
 
+@unittest.skipIf(not FileStorage or not isinstance(storage, FileStorage),
+                 "Skipping file-storage BaseModel tests when storage is not FileStorage")
 class test_basemodel(unittest.TestCase):
     """ """
 

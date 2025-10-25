@@ -1,9 +1,18 @@
 #!/usr/bin/python3
 """ """
+import os
+import unittest
 from tests.test_models.test_base_model import test_basemodel
 from models.state import State
+from models import storage
+try:
+    from models.engine.file_storage import FileStorage
+except Exception:
+    FileStorage = None
 
 
+@unittest.skipIf(not FileStorage or not isinstance(storage, FileStorage),
+                 "Skipping file-storage State tests when storage is not FileStorage")
 class test_state(test_basemodel):
     """ """
 
