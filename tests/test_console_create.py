@@ -34,7 +34,9 @@ class TestCreateParams(unittest.TestCase):
         sys_stdout = sys.stdout
         try:
             sys.stdout = captured
-            cons.onecmd('create Place name="My_little_house" number_rooms=4 price_by_night=100.5')
+            cons.onecmd(
+                'create Place name="My_little_house" number_rooms=4 price_by_night=100.5'
+            )
         finally:
             sys.stdout = sys_stdout
         out = captured.getvalue().strip()
@@ -81,7 +83,10 @@ class TestCreateParams(unittest.TestCase):
         self.assertEqual(obj.name, 'California')
 
     def test_create_state_and_city(self):
-        """Test create State name="California" + create City state_id="<new state ID>" name="Fremont" is present (more than one parameter) - FileStorage"""
+        """
+        Test create State name="California" + create City state_id="<new state ID>" name="Fremont" is present
+        (more than one parameter) - FileStorage
+        """
         cons = HBNBCommand()
         captured = io.StringIO()
         sys_stdout = sys.stdout
@@ -89,7 +94,9 @@ class TestCreateParams(unittest.TestCase):
             sys.stdout = captured
             cons.onecmd('create State name="California"')
             state_id = captured.getvalue().strip()
-            cons.onecmd(f'create City state_id="{state_id}" name="Fremont"')
+            cons.onecmd(
+                f'create City state_id="{state_id}" name="Fremont"'
+            )
         finally:
             sys.stdout = sys_stdout
         out = captured.getvalue().strip()
@@ -115,7 +122,9 @@ class TestCreateParams(unittest.TestCase):
             sys.stdout = captured
             cons.onecmd('create State name="California"')
             state_id = captured.getvalue().strip()
-            cons.onecmd(f'create City state_id="{state_id}" name="San_Francisco"')
+            cons.onecmd(
+                f'create City state_id="{state_id}" name="San_Francisco"'
+            )
         finally:
             sys.stdout = sys_stdout
         out = captured.getvalue().strip()
@@ -140,11 +149,20 @@ class TestCreateParams(unittest.TestCase):
             sys.stdout = captured
             cons.onecmd('create State name="California"')
             state_id = captured.getvalue().strip()
-            cons.onecmd(f'create City state_id="{state_id}" name="San_Francisco_is_super_cool"')
+            cons.onecmd(
+                f'create City state_id="{state_id}" name="San_Francisco_is_super_cool"'
+            )
             city_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
-            cons.onecmd('create User email="my@me.com" password="pwd" first_name="FN" last_name="LN"')
+            cons.onecmd(
+                'create User email="my@me.com" password="pwd" first_name="FN" last_name="LN"'
+            )
             user_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
-            cons.onecmd(f'create Place city_id="{city_id}" user_id="{user_id}" name="My_house" description="no_description_yet" number_rooms=4 number_bathrooms=1 max_guest=3 price_by_night=100 latitude=120.12 longitude=101.4')
+            cons.onecmd(
+                f'create Place city_id="{city_id}" user_id="{user_id}" '
+                'name="My_house" description="no_description_yet" '
+                'number_rooms=4 number_bathrooms=1 max_guest=3 '
+                'price_by_night=100 latitude=120.12 longitude=101.4'
+            )
             place_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
             cons.onecmd(f'show Place {place_id}')
         finally:
