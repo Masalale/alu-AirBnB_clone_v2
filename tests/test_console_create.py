@@ -35,7 +35,8 @@ class TestCreateParams(unittest.TestCase):
         try:
             sys.stdout = captured
             cons.onecmd(
-                'create Place name="My_little_house" number_rooms=4 price_by_night=100.5'
+                'create Place name="My_little_house" number_rooms=4 '
+                'price_by_night=100.5'
             )
         finally:
             sys.stdout = sys_stdout
@@ -150,11 +151,13 @@ class TestCreateParams(unittest.TestCase):
             cons.onecmd('create State name="California"')
             state_id = captured.getvalue().strip()
             cons.onecmd(
-                f'create City state_id="{state_id}" name="San_Francisco_is_super_cool"'
+                f'create City state_id="{state_id}" '
+                'name="San_Francisco_is_super_cool"'
             )
             city_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
             cons.onecmd(
-                'create User email="my@me.com" password="pwd" first_name="FN" last_name="LN"'
+                'create User email="my@me.com" password="pwd" '
+                'first_name="FN" last_name="LN"'
             )
             user_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
             cons.onecmd(

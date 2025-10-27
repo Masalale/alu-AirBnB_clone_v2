@@ -98,7 +98,9 @@ class BaseModel:
         # remove SQLAlchemy instance state if present
         dictionary.pop('_sa_instance_state', None)
         dictionary.update({
-            '__class__': (str(type(self)).split('.')[-1]).split("'")[0]
+            '__class__': (
+                str(type(self)).split('.')[-1]
+            ).split("'")[0]
         })
         # convert datetimes to isoformat
         if 'created_at' in dictionary and isinstance(dictionary['created_at'], datetime):
