@@ -73,7 +73,9 @@ class TestCreateParams(unittest.TestCase):
         sys_stdout = sys.stdout
         try:
             sys.stdout = captured
-            cons.onecmd('create State name="California"')
+            cons.onecmd(
+                'create State name="California"'
+            )
         finally:
             sys.stdout = sys_stdout
         out = captured.getvalue().strip()
@@ -93,7 +95,9 @@ class TestCreateParams(unittest.TestCase):
         sys_stdout = sys.stdout
         try:
             sys.stdout = captured
-            cons.onecmd('create State name="California"')
+            cons.onecmd(
+                'create State name="California"'
+            )
             state_id = captured.getvalue().strip()
             cons.onecmd(
                 f'create City state_id="{state_id}" name="Fremont"'
@@ -121,7 +125,9 @@ class TestCreateParams(unittest.TestCase):
         sys_stdout = sys.stdout
         try:
             sys.stdout = captured
-            cons.onecmd('create State name="California"')
+            cons.onecmd(
+                'create State name="California"'
+            )
             state_id = captured.getvalue().strip()
             cons.onecmd(
                 f'create City state_id="{state_id}" name="San_Francisco"'
@@ -176,8 +182,8 @@ class TestCreateParams(unittest.TestCase):
         city_key = 'City.' + city_id
         user_key = 'User.' + user_id
         place_key = 'Place.' + place_id
-        self.assertIn(state_key, storage.all())
-        self.assertIn(city_key, storage.all())
+    self.assertIn(state_key, storage.all())
+    self.assertIn(city_key, storage.all())
         self.assertIn(user_key, storage.all())
         self.assertIn(place_key, storage.all())
         # Verify attributes

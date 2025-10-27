@@ -64,7 +64,9 @@ class TestCreateSequence(unittest.TestCase):
         # console_2.py: underscores in name become spaces
         sid = self._run_cmd('create State name="California"')
         self.assertTrue(sid)
-        cid = self._run_cmd(f'create City state_id="{sid}" name="San_Francisco"')
+        cid = self._run_cmd(
+            f'create City state_id="{sid}" name="San_Francisco"'
+        )
         self.assertTrue(cid)
         city = storage.all()['City.' + cid]
         self.assertEqual(city.name, 'San Francisco')
@@ -72,8 +74,13 @@ class TestCreateSequence(unittest.TestCase):
     def test_create_full_sequence_and_show_place(self):
         # console_3/4.py: create state, city, user, place and verify place attributes
         sid = self._run_cmd('create State name="California"')
-        cid = self._run_cmd(f'create City state_id="{sid}" name="San_Francisco_is_super_cool"')
-        uid = self._run_cmd('create User email="my@me.com" password="pwd" first_name="FN" last_name="LN"')
+        cid = self._run_cmd(
+            f'create City state_id="{sid}" name="San_Francisco_is_super_cool"'
+        )
+        uid = self._run_cmd(
+            'create User email="my@me.com" password="pwd" '
+            'first_name="FN" last_name="LN"'
+        )
         pid = self._run_cmd(
             f'create Place city_id="{cid}" user_id="{uid}" '
             'name="My_house" description="no_description_yet" '
