@@ -51,7 +51,9 @@ class BaseModel:
             # Expect created_at and updated_at to be provided in kwargs (old
             # behaviour). Raise KeyError if they're missing to match tests.
             if 'created_at' not in kwargs or 'updated_at' not in kwargs:
-                raise KeyError('created_at and updated_at required in kwargs')
+                raise KeyError(
+                    'created_at and updated_at required in kwargs'
+                )
 
             # parse datetimes
             if isinstance(kwargs['created_at'], str):
