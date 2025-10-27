@@ -104,9 +104,13 @@ class BaseModel:
         })
         # convert datetimes to isoformat
         if 'created_at' in dictionary and isinstance(dictionary['created_at'], datetime):
-            dictionary['created_at'] = dictionary['created_at'].isoformat()
+            dictionary['created_at'] = (
+                dictionary['created_at'].isoformat()
+            )
         if 'updated_at' in dictionary and isinstance(dictionary['updated_at'], datetime):
-            dictionary['updated_at'] = dictionary['updated_at'].isoformat()
+            dictionary['updated_at'] = (
+                dictionary['updated_at'].isoformat()
+            )
         return dictionary
 
     def delete(self):

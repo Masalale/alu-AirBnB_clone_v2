@@ -75,7 +75,8 @@ class TestCreateSequence(unittest.TestCase):
         # console_3/4.py: create state, city, user, place and verify place attributes
         sid = self._run_cmd('create State name="California"')
         cid = self._run_cmd(
-            f'create City state_id="{sid}" name="San_Francisco_is_super_cool"'
+            f'create City state_id="{sid}" '
+            'name="San_Francisco_is_super_cool"'
         )
         uid = self._run_cmd(
             'create User email="my@me.com" password="pwd" '
@@ -97,7 +98,7 @@ class TestCreateSequence(unittest.TestCase):
         # floats
         self.assertAlmostEqual(float(place.price_by_night), 100.0)
         self.assertAlmostEqual(float(place.latitude), 120.12)
-        self.assertAlmostEqual(float(place.longitude), 101.4)
+    self.assertAlmostEqual(float(place.longitude), 101.4)
 
         # show command prints object representation containing id and attributes
         cons = HBNBCommand()

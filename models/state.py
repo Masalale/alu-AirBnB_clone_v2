@@ -15,7 +15,8 @@ class State(BaseModel, Base):
         name = Column(String(128), nullable=False)
         # DB relationship: State has many cities; deleting a State cascades
         cities = relationship(
-            'City', backref='state', cascade='all, delete, delete-orphan'
+            'City', backref='state',
+            cascade='all, delete, delete-orphan'
         )
     else:
         name = ""

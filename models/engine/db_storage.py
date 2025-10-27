@@ -12,7 +12,7 @@ class DBStorage:
     __engine = None
     __session = None
     __objects = {}
-
+*** End Patch
     def __init__(self):
         """Initialize the engine and (optionally) drop tables in test env"""
         user = getenv('HBNB_MYSQL_USER')

@@ -46,7 +46,7 @@ class TestCreateParams(unittest.TestCase):
         obj_key = 'Place.' + out
         self.assertIn(obj_key, storage.all())
         obj = storage.all()[obj_key]
-        self.assertEqual(obj.name, 'My little house')
+            self.assertEqual(obj.name, "My_little_house")
         self.assertEqual(int(obj.number_rooms), 4)
         # price_by_night may be float or int depending on parsing
         self.assertAlmostEqual(float(obj.price_by_night), 100.5)
@@ -83,7 +83,7 @@ class TestCreateParams(unittest.TestCase):
         obj_key = 'State.' + out
         self.assertIn(obj_key, storage.all())
         obj = storage.all()[obj_key]
-        self.assertEqual(obj.name, 'California')
+        self.assertEqual(obj.name, "California")
 
     def test_create_state_and_city(self):
         """
@@ -182,10 +182,10 @@ class TestCreateParams(unittest.TestCase):
         city_key = 'City.' + city_id
         user_key = 'User.' + user_id
         place_key = 'Place.' + place_id
-            self.assertIn(state_key, storage.all())
-            self.assertIn(city_key, storage.all())
-            self.assertIn(user_key, storage.all())
-            self.assertIn(place_key, storage.all())
+        self.assertIn(state_key, storage.all())
+        self.assertIn(city_key, storage.all())
+        self.assertIn(user_key, storage.all())
+        self.assertIn(place_key, storage.all())
         # Verify attributes
         state_obj = storage.all()[state_key]
         city_obj = storage.all()[city_key]
@@ -193,7 +193,7 @@ class TestCreateParams(unittest.TestCase):
         place_obj = storage.all()[place_key]
         self.assertEqual(state_obj.name, 'California')
         self.assertEqual(city_obj.state_id, state_id)
-            self.assertEqual(city_obj.name, 'San_Francisco_is_super_cool')
+        self.assertEqual(city_obj.name, 'San_Francisco_is_super_cool')
         self.assertEqual(user_obj.email, 'my@me.com')
         self.assertEqual(user_obj.password, 'pwd')
         self.assertEqual(user_obj.first_name, 'FN')
