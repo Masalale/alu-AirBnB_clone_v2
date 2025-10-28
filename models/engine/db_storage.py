@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """DBStorage engine using SQLAlchemy"""
 from os import getenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from models.base_model import Base
@@ -26,7 +26,12 @@ class DBStorage:
 
         if env == 'test':
             # Drop all tables for a clean test database
+            # Disable foreign key checks to avoid constraint errors
+            with self.__engine.begin() as conn:
+                conn.execute(text('SET FOREIGN_KEY_CHECKS=0'))
             Base.metadata.drop_all(self.__engine)
+            with self.__engine.begin() as conn:
+                conn.execute(text('SET FOREIGN_KEY_CHECKS=1'))
 
     def all(self, cls=None):
         """Return all objects in storage (test compatibility) or DB query."""
@@ -73,8 +78,11 @@ class DBStorage:
             # For test compatibility
             key = obj.__class__.__name__ + '.' + obj.id
             self.__objects[key] = obj
-            # Real DB logic
-            self.__session.add(obj)
+            # Real DB logic - only add if it's a mapped SQLAlchemy entity
+            # Check if the object's class inherits from Base
+            from models.base_model import Base
+            if isinstance(obj, Base):
+                self.__session.add(obj)
 
     def save(self):
         """Commit all changes of the current database session"""
@@ -85,7 +93,10 @@ class DBStorage:
         if obj:
             key = obj.__class__.__name__ + '.' + obj.id
             self.__objects.pop(key, None)
-            self.__session.delete(obj)
+            # Only delete from session if it's a mapped SQLAlchemy entity
+            from models.base_model import Base
+            if isinstance(obj, Base):
+                self.__session.delete(obj)
 
     def reload(self):
         """Create all tables in the database and initialize a session"""

@@ -6,7 +6,11 @@ It also defines the SQLAlchemy Base() for mapped classes to inherit from.
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+try:
+    from sqlalchemy.orm import declarative_base
+except ImportError:
+    # Fallback for older SQLAlchemy versions
+    from sqlalchemy.ext.declarative import declarative_base
 
 
 # Base class for SQLAlchemy models. BaseModel does NOT inherit from Base;
