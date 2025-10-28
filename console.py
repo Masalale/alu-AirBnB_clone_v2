@@ -114,44 +114,59 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-
+        """Create an instance with optional parameters.
+        Usage: create <ClassName> [<key>=<value> ...]
+        """
         # split the args to get the class name
-        class_name = args.split(' ')[0]
+        tokens = args.split(' ')
+        class_name = tokens[0] if tokens else ''
+        
         # Validate if the class name is provided and if it exists
         if not class_name:
             print("** class name missing **")
+            return
         elif class_name not in HBNBCommand.classes.keys():
             print("** class doesn't exist **")
-        else:
-            # create an instance of the class
-            new_model = HBNBCommand.classes[class_name]()
+            return
+        
+        # create an instance of the class
+        new_model = HBNBCommand.classes[class_name]()
 
-            # if there are parameters provided, set the attributes
-            if len(args.split(' ')) > 1:
-
-                # get the parameters from the string
-                params = args.split(' ')[1:]
-                for param in params:
-                    # split the param to get the key and value
-                    key, value = param.split('=')
-
-                    # if value is convertable to another type, convert it
-                    # convertable types are int, float, bool
+        # if there are parameters provided, set the attributes
+        if len(tokens) > 1:
+            # get the parameters from the string
+            params = tokens[1:]
+            for param in params:
+                # skip empty strings
+                if not param or '=' not in param:
+                    continue
+                
+                # split the param to get the key and value
+                key, value = param.split('=', 1)
+                
+                # Handle different value types
+                # 1. String with quotes
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]  # Remove quotes
+                    # Replace underscores with spaces
+                    value = value.replace('_', ' ')
+                # 2. Float (contains decimal point)
+                elif '.' in value:
                     try:
-                        value = eval(value)
-                    except Exception as e:
-                        pass
-                    # if value is a string and it contains underscore(_)
-                    # replace the underscore with space
-                    if type(value) is str and '_' in value:
-                        value = value.replace('_', ' ')
-
-                    setattr(new_model, key, value)
-                new_model.save()
-                print(new_model.id)
-                return
-            new_model.save()
-            print(new_model.id)
+                        value = float(value)
+                    except ValueError:
+                        continue  # Skip invalid values
+                # 3. Integer
+                else:
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        continue  # Skip invalid values
+                
+                setattr(new_model, key, value)
+        
+        new_model.save()
+        print(new_model.id)
 
     def help_create(self):
         """ Help information for the create method """
