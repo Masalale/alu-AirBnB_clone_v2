@@ -43,7 +43,9 @@ class BaseModel:
             try:
                 from models import storage
                 # If storage is FileStorage, it expects new() to be called here
-                if getattr(storage, '__class__', None).__name__ == 'FileStorage':
+                if (
+                    getattr(storage, '__class__', None).__name__ == 'FileStorage'
+                ):
                     storage.new(self)
             except Exception:
                 pass
