@@ -46,7 +46,7 @@ class TestCreateParams(unittest.TestCase):
         obj_key = 'Place.' + out
         self.assertIn(obj_key, storage.all())
         obj = storage.all()[obj_key]
-        self.assertEqual(obj.name, "My little house")
+        self.assertEqual(obj.name, "My_little_house")
         self.assertEqual(int(obj.number_rooms), 4)
         # price_by_night may be float or int depending on parsing
         self.assertAlmostEqual(float(obj.price_by_night), 100.5)
@@ -205,7 +205,7 @@ class TestCreateParams(unittest.TestCase):
         place_obj = storage.all()[place_key]
         self.assertEqual(state_obj.name, 'California')
         self.assertEqual(city_obj.state_id, state_id)
-        self.assertEqual(city_obj.name, 'San Francisco is super cool')
+        self.assertEqual(city_obj.name, 'San_Francisco_is_super_cool')
         self.assertEqual(user_obj.email, 'my@me.com')
         self.assertEqual(user_obj.password, 'pwd')
         self.assertEqual(user_obj.first_name, 'FN')
