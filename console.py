@@ -117,8 +117,27 @@ class HBNBCommand(cmd.Cmd):
         """Create an instance with optional parameters.
         Usage: create <ClassName> [<key>=<value> ...]
         """
-        # split the args to get the class name
-        tokens = args.split(' ')
+        # Parse args to handle quoted values with spaces
+        tokens = []
+        current_token = []
+        in_quotes = False
+        
+        for char in args:
+            if char == '"':
+                in_quotes = not in_quotes
+                current_token.append(char)
+            elif char == ' ' and not in_quotes:
+                if current_token:
+                    tokens.append(''.join(current_token))
+                    current_token = []
+            else:
+                current_token.append(char)
+        
+        # Add the last token if any
+        if current_token:
+            tokens.append(''.join(current_token))
+        
+        # Get class name
         class_name = tokens[0] if tokens else ''
         
         # Validate if the class name is provided and if it exists
@@ -167,6 +186,7 @@ class HBNBCommand(cmd.Cmd):
         
         new_model.save()
         print(new_model.id)
+
 
     def help_create(self):
         """ Help information for the create method """
