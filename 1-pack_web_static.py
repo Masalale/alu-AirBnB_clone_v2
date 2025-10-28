@@ -40,4 +40,5 @@ def do_pack():
         else:
             return None
     except Exception as e:
+        print("Error: {}".format(e))
         return None
