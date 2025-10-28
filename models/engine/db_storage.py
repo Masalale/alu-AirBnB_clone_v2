@@ -1,132 +1,106 @@
 #!/usr/bin/python3
-"""DBStorage engine using SQLAlchemy"""
+"""
+Contains the class DBStorage
+"""
+
+import models
+from models.amenity import Amenity
+from models.base_model import BaseModel, Base
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
 from os import getenv
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, scoped_session
+import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 
-# Try to use PyMySQL as MySQLdb replacement if MySQLdb not available
-try:
-    import MySQLdb
-except ImportError:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-
-from models.base_model import Base
+classes = {"Amenity": Amenity, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
 
 
 class DBStorage:
-    """Interacts with the MySQL database using SQLAlchemy"""
+    """interaacts with the MySQL database"""
     __engine = None
     __session = None
-    __objects = {}
 
     def __init__(self):
-        """Initialize the engine and (optionally) drop tables in test env"""
-        user = getenv('HBNB_MYSQL_USER')
-        pwd = getenv('HBNB_MYSQL_PWD')
-        host = getenv('HBNB_MYSQL_HOST')
-        db = getenv('HBNB_MYSQL_DB')
-        env = getenv('HBNB_ENV')
-
-        connection = 'mysql+mysqldb://{}:{}@{}/{}'.format(user, pwd, host, db)
-        self.__engine = create_engine(connection, pool_pre_ping=True)
-
-        if env == 'test':
-            # Drop all tables for a clean test database
-            # Disable foreign key checks to avoid constraint errors
-            with self.__engine.begin() as conn:
-                conn.execute(text('SET FOREIGN_KEY_CHECKS=0'))
+        """Instantiate a DBStorage object"""
+        HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
+        HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
+        HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
+        HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
+        HBNB_ENV = getenv('HBNB_ENV')
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.
+                                      format(HBNB_MYSQL_USER,
+                                             HBNB_MYSQL_PWD,
+                                             HBNB_MYSQL_HOST,
+                                             HBNB_MYSQL_DB))
+        if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
-            with self.__engine.begin() as conn:
-                conn.execute(text('SET FOREIGN_KEY_CHECKS=1'))
 
     def all(self, cls=None):
-        """Return all objects in storage (test compatibility) or DB query."""
-        # If test expects __objects, return it
-        if self.__objects:
-            return self.__objects
-        # Otherwise, use SQLAlchemy logic
-        # Return empty dict if session not initialized
-        if self.__session is None:
-            return {}
-        from models.user import User
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.place import Place
-        from models.review import Review
-
-        classes = {
-            'User': User, 'State': State, 'City': City,
-            'Amenity': Amenity, 'Place': Place, 'Review': Review
-        }
-
-        obj_dict = {}
-        if cls:
-            # allow cls to be a class or a class name
-            if isinstance(cls, str):
-                cls = classes.get(cls, None)
-            if cls is None:
-                return {}
-            if self.__session is None:
-                return {}
-            query = self.__session.query(cls).all()
-            for obj in query:
-                key = '{}.{}'.format(obj.__class__.__name__, obj.id)
-                obj_dict[key] = obj
-            return obj_dict
-
-        # cls is None: query all known classes
-        for name, klass in classes.items():
-            if self.__session is None:
-                return obj_dict
-            query = self.__session.query(klass).all()
-            for obj in query:
-                key = '{}.{}'.format(obj.__class__.__name__, obj.id)
-                obj_dict[key] = obj
-        return obj_dict
+        """query on the current database session"""
+        new_dict = {}
+        for clss in classes:
+            if cls is None or cls is classes[clss] or cls is clss:
+                objs = self.__session.query(classes[clss]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    new_dict[key] = obj
+        return (new_dict)
 
     def new(self, obj):
-        """Add the object to the current database session or test dict."""
-        if obj:
-            # For test compatibility
-            key = obj.__class__.__name__ + '.' + obj.id
-            self.__objects[key] = obj
-            # Real DB logic - only add if it's a mapped SQLAlchemy entity
-            # Check if the object's class inherits from Base
-            from models.base_model import Base
-            if self.__session and isinstance(obj, Base):
-                self.__session.add(obj)
+        """add the object to the current database session"""
+        self.__session.add(obj)
 
     def save(self):
-        """Commit all changes of the current database session"""
-        if self.__session:
-            self.__session.commit()
+        """commit all changes of the current database session"""
+        self.__session.commit()
 
     def delete(self, obj=None):
-        """Delete obj from the current database session or test dict."""
-        if obj:
-            key = obj.__class__.__name__ + '.' + obj.id
-            self.__objects.pop(key, None)
-            # Only delete from session if it's a mapped SQLAlchemy entity
-            from models.base_model import Base
-            if self.__session and isinstance(obj, Base):
-                self.__session.delete(obj)
+        """delete from the current database session obj if not None"""
+        if obj is not None:
+            self.__session.delete(obj)
 
     def reload(self):
-        """Create all tables in the database and initialize a session"""
-        # import all classes to ensure they are registered with SQLAlchemy
-        from models.user import User
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.place import Place
-        from models.review import Review
-
+        """reloads data from the database"""
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(
-            bind=self.__engine, expire_on_commit=False
-        )
-        Session = scoped_session(session_factory)
-        self.__session = Session()
-# End of DBStorage
+        sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(sess_factory)
+        self.__session = Session
+
+    def close(self):
+        """call remove() method on the private session attribute"""
+        self.__session.remove()
+
+    def get(self, cls, id):
+        """
+        Returns the object based on the class name and its ID, or
+        None if not found
+        """
+        if cls not in classes.values():
+            return None
+
+        all_cls = models.storage.all(cls)
+        for value in all_cls.values():
+            if (value.id == id):
+                return value
+
+        return None
+
+    def count(self, cls=None):
+        """
+        count the number of objects in storage
+        """
+        all_class = classes.values()
+
+        if not cls:
+            count = 0
+            for clas in all_class:
+                count += len(models.storage.all(clas).values())
+        else:
+            count = len(models.storage.all(cls).values())
+
+        return count
