@@ -114,59 +114,38 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """Create an instance with optional parameters.
-        Usage: create <ClassName> [<key>=<value> ...]
+        """Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
+        Create a new class instance with given keys/values and print its id.
         """
-        # split the args to get the class name
-        tokens = args.split(' ')
-        class_name = tokens[0] if tokens else ''
-        
-        # Validate if the class name is provided and if it exists
-        if not class_name:
-            print("** class name missing **")
-            return
-        elif class_name not in HBNBCommand.classes.keys():
-            print("** class doesn't exist **")
-            return
-        
-        # create an instance of the class
-        new_model = HBNBCommand.classes[class_name]()
+        try:
+            if not args:
+                raise SyntaxError()
+            my_list = args.split(" ")
 
-        # if there are parameters provided, set the attributes
-        if len(tokens) > 1:
-            # get the parameters from the string
-            params = tokens[1:]
-            for param in params:
-                # skip empty strings
-                if not param or '=' not in param:
-                    continue
-                
-                # split the param to get the key and value
-                key, value = param.split('=', 1)
-                
-                # Handle different value types
-                # 1. String with quotes
-                if value.startswith('"') and value.endswith('"'):
-                    value = value[1:-1]  # Remove quotes
-                    # Replace underscores with spaces
-                    value = value.replace('_', ' ')
-                # 2. Float (contains decimal point)
-                elif '.' in value:
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        continue  # Skip invalid values
-                # 3. Integer
+            kwargs = {}
+            for i in range(1, len(my_list)):
+                key, value = tuple(my_list[i].split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
                 else:
                     try:
-                        value = int(value)
-                    except ValueError:
-                        continue  # Skip invalid values
-                
-                setattr(new_model, key, value)
-        
-        new_model.save()
-        print(new_model.id)
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
+
+            if kwargs == {}:
+                obj = eval(my_list[0])()
+            else:
+                obj = eval(my_list[0])(**kwargs)
+                storage.new(obj)
+            print(obj.id)
+            obj.save()
+
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
+            print("** class doesn't exist **")
 
     def help_create(self):
         """ Help information for the create method """
