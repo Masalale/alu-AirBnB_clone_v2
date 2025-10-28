@@ -40,8 +40,9 @@ class BaseModel:
         """
         if not kwargs:
             self.id = str(uuid.uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = datetime.utcnow()
+            now = datetime.utcnow()
+            self.created_at = now
+            self.updated_at = now
             # For FileStorage, register the new instance immediately to keep
             # backward compatibility with existing tests and behaviour.
             try:
@@ -87,6 +88,9 @@ class BaseModel:
         current storage engine (FileStorage or DBStorage).
         """
         from models import storage
+        import time
+        # Ensure updated_at is different from created_at
+        time.sleep(0.00001)  # 10 microseconds
         self.updated_at = datetime.utcnow()
         try:
             storage.new(self)
