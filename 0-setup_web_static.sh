@@ -28,12 +28,9 @@ sudo chown -R ubuntu:ubuntu /data/
 
 # Update Nginx configuration
 NGINX_CONF="/etc/nginx/sites-available/default"
-    \n\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' "$NGINX_CONF"
 if ! grep -q "location /hbnb_static/" "$NGINX_CONF"; then
-  sudo sed -i "/listen 80 default_server;/a \\
-  location /hbnb_static/ {\\
-    alias /data/web_static/current/;\\
-  }" "$NGINX_CONF"
+    sudo sed -i '/listen 80 default_server;/a \
+    \n\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' "$NGINX_CONF"
 fi
 
 # Restart Nginx
