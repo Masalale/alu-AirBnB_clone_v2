@@ -144,6 +144,11 @@ class HBNBCommand(cmd.Cmd):
                     value = value.replace("_", " ")
                 setattr(obj, key, value)
 
+            # Set default values for missing required fields in DBStorage
+            if my_list[0] == 'Review':
+                if not hasattr(obj, 'text') or obj.text is None:
+                    obj.text = ""
+
             print(obj.id)
             obj.save()
 
@@ -159,9 +164,6 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, args):
         """ Method to show an individual object """
-        # Set default values for missing required fields
-        if isinstance(obj, Review) and not hasattr(obj, 'text'):
-            obj.text = "Default review text"
         new = args.partition(" ")
         c_name = new[0]
         c_id = new[2]
