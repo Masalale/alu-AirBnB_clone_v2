@@ -169,6 +169,8 @@ class HBNBCommand(cmd.Cmd):
                     value = value[1:-1]  # Remove quotes
                     # Replace underscores with spaces
                     value = value.replace('_', ' ')
+                    # Handle escaped double quotes
+                    value = value.replace('\\"', '"')
                 # 2. Float (contains decimal point)
                 elif '.' in value:
                     try:
