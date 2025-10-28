@@ -40,9 +40,11 @@ class BaseModel:
         """
         if not kwargs:
             self.id = str(uuid.uuid4())
-            now = datetime.utcnow()
-            self.created_at = now
-            self.updated_at = now
+            import time
+            self.created_at = datetime.utcnow()
+            # Ensure updated_at is slightly different from created_at
+            time.sleep(0.001)  # 1 millisecond delay
+            self.updated_at = datetime.utcnow()
             # For FileStorage, register the new instance immediately to keep
             # backward compatibility with existing tests and behaviour.
             try:
