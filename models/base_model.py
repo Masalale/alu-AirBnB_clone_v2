@@ -101,7 +101,7 @@ class BaseModel:
             pass
         storage.save()
 
-    def to_dict(self):
+    def to_dict(self, **kwargs):
         """Return a dict representation of the instance
 
         Ensure SQLAlchemy internals (_sa_instance_state) are not included.
