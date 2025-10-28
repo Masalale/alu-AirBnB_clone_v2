@@ -4,6 +4,13 @@ from os import getenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+# Try to use PyMySQL as MySQLdb replacement if MySQLdb not available
+try:
+    import MySQLdb
+except ImportError:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
 from models.base_model import Base
 
 

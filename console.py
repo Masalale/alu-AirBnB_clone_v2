@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import shlex
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -120,7 +121,8 @@ class HBNBCommand(cmd.Cmd):
         try:
             if not args:
                 raise SyntaxError()
-            my_list = args.split(" ")
+            # Use shlex to properly split arguments respecting quotes
+            my_list = shlex.split(args)
 
             # Create the object first without kwargs
             obj = eval(my_list[0])()
@@ -130,13 +132,16 @@ class HBNBCommand(cmd.Cmd):
                 if '=' not in my_list[i]:
                     continue
                 key, value = tuple(my_list[i].split("=", 1))
-                if value[0] == '"':
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
+                # shlex already removes quotes, so just replace underscores
+                if not value:
+                    continue
+                # Check if it's a string (not a number)
+                try:
+                    # Try to evaluate as number
+                    value = eval(value)
+                except (SyntaxError, NameError, ValueError):
+                    # It's a string, replace underscores with spaces
+                    value = value.replace("_", " ")
                 setattr(obj, key, value)
 
             print(obj.id)
@@ -176,7 +181,7 @@ class HBNBCommand(cmd.Cmd):
 
         key = c_name + "." + c_id
         try:
-            print(storage._FileStorage__objects[key])
+            print(storage.all()[key])
         except KeyError:
             print("** no instance found **")
 
@@ -244,7 +249,7 @@ class HBNBCommand(cmd.Cmd):
     def do_count(self, args):
         """Count current number of class instances"""
         count = 0
-        for k, v in storage._FileStorage__objects.items():
+        for k, v in storage.all().items():
             if args == k.split('.')[0]:
                 count += 1
         print(count)
