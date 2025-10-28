@@ -159,6 +159,9 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, args):
         """ Method to show an individual object """
+        # Set default values for missing required fields
+        if isinstance(obj, Review) and not hasattr(obj, 'text'):
+            obj.text = "Default review text"
         new = args.partition(" ")
         c_name = new[0]
         c_id = new[2]
