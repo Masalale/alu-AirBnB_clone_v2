@@ -122,9 +122,14 @@ class HBNBCommand(cmd.Cmd):
                 raise SyntaxError()
             my_list = args.split(" ")
 
-            kwargs = {}
+            # Create the object first without kwargs
+            obj = eval(my_list[0])()
+            
+            # Then set attributes from parameters
             for i in range(1, len(my_list)):
-                key, value = tuple(my_list[i].split("="))
+                if '=' not in my_list[i]:
+                    continue
+                key, value = tuple(my_list[i].split("=", 1))
                 if value[0] == '"':
                     value = value.strip('"').replace("_", " ")
                 else:
@@ -132,13 +137,8 @@ class HBNBCommand(cmd.Cmd):
                         value = eval(value)
                     except (SyntaxError, NameError):
                         continue
-                kwargs[key] = value
+                setattr(obj, key, value)
 
-            if kwargs == {}:
-                obj = eval(my_list[0])()
-            else:
-                obj = eval(my_list[0])(**kwargs)
-                storage.new(obj)
             print(obj.id)
             obj.save()
 
