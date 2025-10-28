@@ -72,21 +72,20 @@ class TestCreateSequence(unittest.TestCase):
         self.assertEqual(city.name, 'San Francisco')
 
     def test_create_full_sequence_and_show_place(self):
-        # console_3/4.py: create state, city, user, place and verify place attributes
+        # console_3/4.py: create state, city, user, place
+        # and verify place attributes
         sid = self._run_cmd('create State name="California"')
         cid = self._run_cmd(
             f'create City state_id="{sid}" '
             'name="San_Francisco_is_super_cool"'
         )
-        cid = self._run_cmd(
-            f'create City state_id="{sid}" '
-            'name="San_Francisco_is_super_cool"'
+        uid = self._run_cmd(
+            'create User email="my@me.com" password="pwd" '
+            'first_name="FN" last_name="LN"'
         )
-        )
-        cid = self._run_cmd(
-            f'create City state_id="{sid}" '
-            'name="San_Francisco_is_super_cool"'
-        )
+        pid = self._run_cmd(
+            f'create Place city_id="{cid}" user_id="{uid}" '
+            'name="My_house" description="no_description_yet" '
             'number_rooms=4 number_bathrooms=1 max_guest=3 '
             'price_by_night=100 latitude=120.12 longitude=101.4'
         )
@@ -102,8 +101,9 @@ class TestCreateSequence(unittest.TestCase):
         self.assertAlmostEqual(float(place.latitude), 120.12)
         self.assertAlmostEqual(float(place.longitude), 101.4)
 
-    # show command prints object representation containing id and attributes
-    cons = HBNBCommand()
+        # show command prints object representation
+        # containing id and attributes
+        cons = HBNBCommand()
         captured = io.StringIO()
         sys_stdout = sys.stdout
         try:

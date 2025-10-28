@@ -42,10 +42,10 @@ class BaseModel:
             # backward compatibility with existing tests and behaviour.
             try:
                 from models import storage
-                # If storage is FileStorage, it expects new() to be called here
-                if (
-                    getattr(storage, '__class__', None).__name__ == 'FileStorage'
-                ):
+                # If storage is FileStorage, it expects new()
+                # to be called here
+                storage_class = getattr(storage, '__class__', None)
+                if storage_class and storage_class.__name__ == 'FileStorage':
                     storage.new(self)
             except Exception:
                 pass
@@ -105,14 +105,12 @@ class BaseModel:
             ).split("'")[0]
         })
         # convert datetimes to isoformat
-        if 'created_at' in dictionary and isinstance(dictionary['created_at'], datetime):
-            dictionary['created_at'] = (
-                dictionary['created_at'].isoformat()
-            )
-        if 'updated_at' in dictionary and isinstance(dictionary['updated_at'], datetime):
-            dictionary['updated_at'] = (
-                dictionary['updated_at'].isoformat()
-            )
+        if ('created_at' in dictionary and
+                isinstance(dictionary['created_at'], datetime)):
+            dictionary['created_at'] = dictionary['created_at'].isoformat()
+        if ('updated_at' in dictionary and
+                isinstance(dictionary['updated_at'], datetime)):
+            dictionary['updated_at'] = dictionary['updated_at'].isoformat()
         return dictionary
 
     def delete(self):

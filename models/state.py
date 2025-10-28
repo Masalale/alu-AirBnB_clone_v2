@@ -23,7 +23,8 @@ class State(BaseModel, Base):
 
         @property
         def cities(self):
-            """Return list of City instances with state_id == self.id (FileStorage)"""
+            """Return list of City instances with state_id == self.id
+            (FileStorage)"""
             from models import storage
             from models.city import City
             return [

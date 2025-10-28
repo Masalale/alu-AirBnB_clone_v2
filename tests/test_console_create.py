@@ -67,7 +67,8 @@ class TestCreateParams(unittest.TestCase):
         self.assertIn(obj_key, storage.all())
 
     def test_create_state_with_name(self):
-        """Test create State name="California" is present (new feature) - FileStorage"""
+        """Test create State name="California" is present
+        (new feature) - FileStorage"""
         cons = HBNBCommand()
         captured = io.StringIO()
         sys_stdout = sys.stdout
@@ -86,10 +87,9 @@ class TestCreateParams(unittest.TestCase):
         self.assertEqual(obj.name, "California")
 
     def test_create_state_and_city(self):
-        """
-        Test create State name="California" + create City state_id="<new state ID>" name="Fremont" is present
-        (more than one parameter) - FileStorage
-        """
+        """Test create State name="California" + create City
+        state_id="<new state ID>" name="Fremont" is present
+        (more than one parameter) - FileStorage"""
         cons = HBNBCommand()
         captured = io.StringIO()
         sys_stdout = sys.stdout
@@ -119,7 +119,9 @@ class TestCreateParams(unittest.TestCase):
         self.assertEqual(city_obj.name, 'Fremont')
 
     def test_create_state_and_city_with_underscore(self):
-        """Test create State name="California" + create City state_id="<new state ID>" name="San_Francisco" is present (space translated to _) - FileStorage"""
+        """Test create State name="California" + create City
+        state_id="<new state ID>" name="San_Francisco" is present
+        (space translated to _) - FileStorage"""
         cons = HBNBCommand()
         captured = io.StringIO()
         sys_stdout = sys.stdout
@@ -148,7 +150,8 @@ class TestCreateParams(unittest.TestCase):
         self.assertEqual(city_obj.name, 'San Francisco')
 
     def test_complex_creation(self):
-        """Test create State name="California" + create City state_id="<new state ID>" name="San_Francisco_is_super_cool" + create User email="my@me.com" password="pwd" first_name="FN" last_name="LN" + create Place city_id="<new city ID>" user_id="<new user ID>" name="My_house" description="no_description_yet" number_rooms=4 number_bathrooms=1 max_guest=3 price_by_night=100 latitude=120.12 longitude=101.4 + show Place <new place ID> is present (integer + float) - FileStorage"""
+        """Test complex creation sequence with State, City, User, Place
+        and verify attributes (integer + float) - FileStorage"""
         cons = HBNBCommand()
         captured = io.StringIO()
         sys_stdout = sys.stdout
@@ -160,19 +163,28 @@ class TestCreateParams(unittest.TestCase):
                 f'create City state_id="{state_id}" '
                 'name="San_Francisco_is_super_cool"'
             )
-            city_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
+            city_id = [
+                line for line in captured.getvalue().strip().split('\n')
+                if line
+            ][-1]
             cons.onecmd(
                 'create User email="my@me.com" password="pwd" '
                 'first_name="FN" last_name="LN"'
             )
-            user_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
+            user_id = [
+                line for line in captured.getvalue().strip().split('\n')
+                if line
+            ][-1]
             cons.onecmd(
                 f'create Place city_id="{city_id}" user_id="{user_id}" '
                 'name="My_house" description="no_description_yet" '
                 'number_rooms=4 number_bathrooms=1 max_guest=3 '
                 'price_by_night=100 latitude=120.12 longitude=101.4'
             )
-            place_id = [line for line in captured.getvalue().strip().split('\n') if line][-1]
+            place_id = [
+                line for line in captured.getvalue().strip().split('\n')
+                if line
+            ][-1]
             cons.onecmd(f'show Place {place_id}')
         finally:
             sys.stdout = sys_stdout

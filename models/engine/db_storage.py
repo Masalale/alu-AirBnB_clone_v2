@@ -12,7 +12,8 @@ class DBStorage:
     __engine = None
     __session = None
     __objects = {}
-        def __init__(self):        
+
+    def __init__(self):
         """Initialize the engine and (optionally) drop tables in test env"""
         user = getenv('HBNB_MYSQL_USER')
         pwd = getenv('HBNB_MYSQL_PWD')
@@ -102,5 +103,4 @@ class DBStorage:
         )
         Session = scoped_session(session_factory)
         self.__session = Session()
-    # End of DBStorage
-
+# End of DBStorage
